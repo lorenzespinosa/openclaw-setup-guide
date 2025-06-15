@@ -1,0 +1,128 @@
+{
+  "gateway": {
+    "bind": "loopback",
+    "port": 3578,
+    "auth": {
+      "mode": "token",
+      "token": "<YOUR_GATEWAY_TOKEN>"
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "maxTokens": 4096,
+      "temperature": 0.3,
+      "tools": {
+        "allow": ["read"],
+        "deny": ["write", "exec", "shell", "system.run", "browser"]
+      },
+      "compaction": {
+        "mode": "safeguard",
+        "model": "openrouter/minimax/minimax-m2.5:free",
+        "threshold": 20,
+        "retainMessages": 5
+      },
+      "memory": {
+        "enabled": true,
+        "maxEntries": 1000,
+        "searchTopK": 10
+      }
+    },
+    "list": [
+      {
+        "id": "orchestrator",
+        "displayName": "OpsBot",
+        "model": "anthropic/claude-sonnet-4-20250514",
+        "systemPrompt": "workspace://SOUL.md",
+        "tools": {
+          "allow": ["read", "write", "memory_search", "sessions_spawn"],
+          "deny": ["exec", "shell"]
+        },
+        "routing": {
+          "default": true,
+          "instructions": "workspace://AGENTS.md"
+        }
+      },
+      {
+        "id": "ops-agent",
+        "displayName": "Ops Specialist",
+        "model": "anthropic/claude-sonnet-4-20250514",
+        "systemPrompt": "You are an operations specialist. Execute workflows and return structured results. Never make assumptions — ask for clarification if inputs are ambiguous.",
+        "tools": {
+          "allow": ["read", "exec"],
+          "exec": {
+            "security": "allowlist",
+            "safeBins": ["curl"],
+            "ask": "always",
+            "env": {
+              "inherit": false,
+              "allow": ["PATH", "HOME"]
+            }
+          },
+          "deny": ["write", "shell", "browser"]
+        }
+      },
+      {
+        "id": "research-agent",
+        "displayName": "Research Specialist",
+        "model": "openrouter/anthropic/claude-3.5-haiku",
+        "systemPrompt": "You are a research assistant. Search workspace files and memory to answer questions. Cite your sources. If you cannot find the answer, say so explicitly.",
+        "tools": {
+          "allow": ["read", "memory_search"],
+          "deny": ["write", "exec", "shell", "browser"]
+        }
+      },
+      {
+        "id": "drafting-agent",
+        "displayName": "Drafting Specialist",
+        "model": "anthropic/claude-sonnet-4-20250514",
+        "systemPrompt": "You are a document drafting assistant. Create and edit documents in the workspace. Follow firm templates and style guidelines. Always confirm before overwriting existing files.",
+        "tools": {
+          "allow": ["read", "write"],
+          "deny": ["exec", "shell", "browser"]
+        }
+      }
+    ]
+  },
+  "tools": {
+    "fs": {
+      "workspaceOnly": true,
+      "allowedPaths": ["/opt/openclaw/workspace"],
+      "denyPaths": ["/opt/openclaw/.env", "/opt/openclaw/openclaw.json"]
+    },
+    "elevated": {
+      "enabled": false
+    }
+  },
+  "mcp": {
+    "servers": {
+      "n8n": {
+        "url": "http://localhost:5678/mcp",
+        "auth": {
+          "type": "bearer",
+          "token": "<YOUR_N8N_MCP_TOKEN>"
+        },
+        "timeout": 30000,
+        "retries": 2
+      }
+    }
+  },
+  "slack": {
+    "socketMode": true,
+    "dmPolicy": "allowlist",
+    "dmAllowlist": ["<USER_ID_1>", "<USER_ID_2>"],
+    "streaming": false,
+    "maxMessageLength": 3000,
+    "threadReplies": true,
+    "reactions": {
+      "processing": "hourglass_flowing_sand",
+      "complete": "white_check_mark",
+      "error": "x"
+    }
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "destination": "stdout"
+  }
+}

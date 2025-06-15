@@ -1,0 +1,96 @@
+# HEARTBEAT.md — Health Check & Self-Monitoring
+
+> Configures the bot's periodic self-monitoring behavior.
+> The heartbeat system runs on a schedule and verifies system health.
+
+---
+
+## Heartbeat Configuration
+
+- **Interval:** Every 15 minutes
+- **Model:** `openrouter/minimax/minimax-m2.5:free` (zero cost)
+- **Timeout:** 30 seconds per check
+- **Alert Channel:** `#ops-alerts` (Slack channel for health notifications)
+
+---
+
+## Health Checks
+
+### 1. LLM Connectivity
+- **Check:** Send a minimal prompt to the primary LLM provider
+- **Pass:** Response received within 10 seconds
+- **Fail action:** Switch to fallback provider, alert in #ops-alerts
+
+### 2. Slack Connection
+- **Check:** Verify Socket Mode WebSocket is connected
+- **Pass:** WebSocket state is OPEN
+- **Fail action:** Attempt reconnect (max 3 retries), alert if persistent
+
+### 3. MCP Server (n8n)
+- **Check:** GET `http://localhost:5678/healthz`
+- **Pass:** HTTP 200 response
+- **Fail action:** Alert in #ops-alerts, disable MCP-dependent tools temporarily
+
+### 4. Disk Usage
+- **Check:** Workspace directory disk usage
+- **Pass:** Below 80% capacity
+- **Warn:** 80-90% — alert to clean up old sessions
+- **Fail:** Above 90% — alert immediately, pause non-critical operations
+
+### 5. Memory Usage
+- **Check:** Node.js process heap usage
+- **Pass:** Below 1.5 GB
+- **Warn:** 1.5-1.8 GB — alert, trigger session compaction
+- **Fail:** Above 1.8 GB — alert, graceful restart recommended
+
+---
+
+## Self-Check Prompt
+
+When the heartbeat runs, use this minimal prompt:
+
+```
+System status check. Report:
+1. Current time (UTC)
+2. Active sessions count
+3. Last error (if any in past 15 min)
+4. Memory usage estimate
+Respond in under 50 tokens.
+```
+
+---
+
+## Alert Format
+
+When posting to #ops-alerts:
+
+```
+:warning: **OpenClaw Health Alert**
+• Check: [check name]
+• Status: [WARN/FAIL]
+• Detail: [what happened]
+• Action: [what was done automatically]
+• Needs human: [yes/no]
+• Timestamp: [ISO 8601]
+```
+
+---
+
+## Maintenance Windows
+
+During scheduled maintenance, suppress non-critical alerts:
+
+- **Weekly maintenance:** Sundays 2:00-4:00 AM ET
+- **Suppress:** Disk and memory warnings
+- **Keep active:** LLM and Slack connectivity checks
+
+---
+
+## Escalation
+
+| Severity | Response | Notify |
+|---|---|---|
+| Info | Log only | Nobody |
+| Warn | Post to #ops-alerts | On-call admin |
+| Fail | Post to #ops-alerts + DM admin | Lorenz (admin) |
+| Critical | Post + DM + attempt auto-recovery | Lorenz (admin) |

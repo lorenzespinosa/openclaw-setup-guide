@@ -1,0 +1,103 @@
+# USER.md — User Profiles & Permissions
+
+> Maps Slack user IDs to roles, permissions, and preferences.
+> The orchestrator references this file to personalize responses and enforce access control.
+
+---
+
+## Roles
+
+| Role | Description | Access Level |
+|---|---|---|
+| `admin` | Firm owner / IT admin. Full access to all agents and tools. | Full |
+| `attorney` | Licensed attorney. Can trigger workflows, access case data. | Standard |
+| `paralegal` | Paralegal / legal assistant. Can search and trigger limited workflows. | Standard |
+| `staff` | Office staff. Read-only access, basic queries only. | Limited |
+
+---
+
+## User Directory
+
+### Admin Users
+
+#### U01ABC123DE — Lorenz Espinosa
+- **Role:** admin
+- **Title:** Automation Engineer
+- **Preferences:** Concise responses, technical detail okay, prefers bullet points
+- **Access:** All agents, all tools, configuration changes
+- **Notes:** Primary bot administrator. Escalate system issues to this user.
+
+#### U02DEF456GH — [Managing Partner Name]
+- **Role:** admin
+- **Title:** Managing Partner
+- **Preferences:** Very brief responses, bottom-line-up-front, no jargon
+- **Access:** All agents, all tools
+- **Notes:** Firm owner. Keep responses under 2 paragraphs.
+
+---
+
+### Attorney Users
+
+#### U03GHI789JK — [Attorney Name]
+- **Role:** attorney
+- **Title:** Associate Attorney — Personal Injury
+- **Preferences:** Detailed when asked, standard otherwise
+- **Access:** ops-agent, research-agent, drafting-agent
+- **Notes:** Handles PI cases. Frequently asks about case status and billing.
+
+#### U04JKL012MN — [Attorney Name]
+- **Role:** attorney
+- **Title:** Associate Attorney — Criminal Defense
+- **Preferences:** Quick answers, links to source docs
+- **Access:** ops-agent, research-agent, drafting-agent
+- **Notes:** Handles criminal cases. Often needs court date lookups.
+
+---
+
+### Paralegal Users
+
+#### U05MNO345PQ — [Paralegal Name]
+- **Role:** paralegal
+- **Title:** Senior Paralegal
+- **Preferences:** Step-by-step instructions, detailed responses
+- **Access:** research-agent, drafting-agent, limited ops-agent (status checks only)
+- **Notes:** Primary intake coordinator. Heavy Lawmatics user.
+
+---
+
+### Staff Users
+
+#### U06PQR678ST — [Staff Name]
+- **Role:** staff
+- **Title:** Office Manager
+- **Preferences:** Plain language, no technical terms
+- **Access:** research-agent only
+- **Notes:** Can query firm policies and procedures. No workflow execution.
+
+---
+
+## Access Matrix
+
+| Action | admin | attorney | paralegal | staff |
+|---|---|---|---|---|
+| Trigger workflows | Yes | Yes | Status checks only | No |
+| Search workspace | Yes | Yes | Yes | Yes |
+| Draft documents | Yes | Yes | Yes | No |
+| View case data | Yes | Yes | Yes (assigned cases) | No |
+| Modify configuration | Yes | No | No | No |
+| View system status | Yes | No | No | No |
+
+---
+
+## Adding New Users
+
+1. Get their Slack Member ID (profile → More → Copy member ID)
+2. Add an entry to this file with their role and preferences
+3. Add their ID to `dmAllowlist` in `openclaw.json`
+4. Restart OpenClaw: `sudo systemctl restart openclaw`
+
+## Removing Users
+
+1. Remove their entry from this file
+2. Remove their ID from `dmAllowlist` in `openclaw.json`
+3. Restart OpenClaw: `sudo systemctl restart openclaw`

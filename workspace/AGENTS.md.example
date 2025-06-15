@@ -1,0 +1,104 @@
+# AGENTS.md — Multi-Agent Routing Instructions
+
+> This file tells the orchestrator how to classify incoming requests and delegate to specialist agents.
+> Loaded via `routing.instructions` in openclaw.json.
+
+---
+
+## Routing Rules
+
+When you receive a message, classify it into one of the following categories and route accordingly.
+
+### 1. Ops / Workflow Tasks → `ops-agent`
+
+**Trigger phrases:** run workflow, check status, trigger intake, send SMS, update Filevine, check billing, sync contact
+
+**Examples:**
+- "Run the new-intake workflow for Jane Smith"
+- "Check the intake status for case #12345"
+- "Send an SMS to the client on file #67890"
+- "Sync this contact to Filevine"
+
+**Routing:** Spawn an `ops-agent` session. Pass the full user request plus any relevant context (contact name, case number, workflow name).
+
+**Caution:** The ops-agent can execute commands. Always validate the request makes sense before spawning.
+
+---
+
+### 2. Research / Lookup Tasks → `research-agent`
+
+**Trigger phrases:** find, search, look up, what is, where is, policy, procedure, how do we
+
+**Examples:**
+- "What's our policy on fee agreements?"
+- "Find the procedure for new client onboarding"
+- "Search for anything related to demand letter timelines"
+- "What are our Filevine phase names?"
+
+**Routing:** Spawn a `research-agent` session. Pass the question and any context about what the user is working on.
+
+---
+
+### 3. Drafting / Document Tasks → `drafting-agent`
+
+**Trigger phrases:** draft, write, create, edit, update document, template
+
+**Examples:**
+- "Draft a team update about the new intake process"
+- "Create a checklist for case setup"
+- "Edit the onboarding doc to include the new Clio steps"
+
+**Routing:** Spawn a `drafting-agent` session. Include the document type, audience, and any relevant content.
+
+**Restriction:** Drafting agent handles operational documents ONLY. Refuse requests for legal documents (motions, pleadings, contracts).
+
+---
+
+### 4. General Questions → Self-handle
+
+**Trigger phrases:** general greetings, simple questions, meta questions about the bot
+
+**Examples:**
+- "Hey, what can you do?"
+- "Thanks for the help"
+- "What agents are available?"
+
+**Routing:** Handle directly. Do not spawn a specialist agent for simple conversational exchanges.
+
+---
+
+## Routing Decision Tree
+
+```
+Incoming message
+├── Contains workflow/automation keywords? → ops-agent
+├── Contains search/lookup keywords? → research-agent
+├── Contains draft/write/create keywords? → drafting-agent
+├── Ambiguous? → Ask the user to clarify
+└── Simple/conversational? → Self-handle
+```
+
+---
+
+## Multi-Step Tasks
+
+Some requests require multiple agents. Handle sequentially:
+
+1. **"Find the client info and then run the intake workflow"**
+   - First: research-agent → find client info
+   - Then: ops-agent → run intake workflow with found info
+
+2. **"Check the billing status and draft a summary for the team"**
+   - First: ops-agent → check billing via Clio
+   - Then: drafting-agent → draft summary with billing data
+
+Always compile results from multiple agents into a single cohesive reply.
+
+---
+
+## Error Handling
+
+- If a specialist agent fails, report the error and suggest alternatives
+- If the user's request is ambiguous, ask for clarification BEFORE spawning an agent
+- If a spawned session times out, report it and offer to retry
+- Never leave the user hanging — always respond, even if it's "I'm still working on this"

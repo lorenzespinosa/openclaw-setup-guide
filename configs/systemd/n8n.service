@@ -1,0 +1,40 @@
+[Unit]
+Description=n8n Workflow Automation
+Documentation=https://docs.n8n.io
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=openclaw
+Group=openclaw
+WorkingDirectory=/opt/n8n
+EnvironmentFile=/opt/n8n/.env
+ExecStart=/usr/bin/n8n start
+Restart=always
+RestartSec=10
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/n8n
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+# Resource limits
+MemoryMax=2G
+CPUQuota=200%
+TasksMax=256
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=n8n
+
+[Install]
+WantedBy=multi-user.target

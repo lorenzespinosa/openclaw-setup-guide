@@ -1,0 +1,133 @@
+# TOOLS.md — Available Tools & Endpoints
+
+> Documents all tools and MCP endpoints available to agents.
+> Referenced by the orchestrator to understand what actions are possible.
+
+---
+
+## Built-in Tools
+
+### read
+- **Description:** Read files from the workspace directory
+- **Scope:** `/opt/openclaw/workspace/` only
+- **Available to:** All agents
+- **Usage:** Reading identity files, firm policies, procedure docs, templates
+
+### write
+- **Description:** Create or modify files in the workspace directory
+- **Scope:** `/opt/openclaw/workspace/` only
+- **Available to:** orchestrator, drafting-agent
+- **Usage:** Creating documents, updating templates, saving drafts
+
+### memory_search
+- **Description:** Search the agent's conversation memory
+- **Scope:** Current agent's memory store
+- **Available to:** orchestrator, research-agent
+- **Usage:** Finding past conversations, recurring topics, user preferences
+
+### sessions_spawn
+- **Description:** Create a new agent session for a specialist agent
+- **Scope:** Agents defined in openclaw.json
+- **Available to:** orchestrator only
+- **Usage:** Delegating tasks to ops-agent, research-agent, or drafting-agent
+
+### exec
+- **Description:** Execute a system command
+- **Scope:** Allowlisted binaries only (`curl`)
+- **Available to:** ops-agent only
+- **Security:** allowlist mode, requires confirmation
+- **Usage:** Calling n8n webhooks, health checks
+
+---
+
+## n8n MCP Tools
+
+These tools are provided by the n8n MCP server at `http://localhost:5678/mcp`.
+
+### n8n.check_intake_status
+- **Description:** Check intake status for a contact in Lawmatics
+- **Input:** `{ "contact_name": "string" }` or `{ "contact_email": "string" }`
+- **Output:** Contact status, next appointment, assigned attorney, source
+- **System:** Lawmatics API
+
+### n8n.run_new_intake
+- **Description:** Process a new intake submission
+- **Input:** `{ "name": "string", "email": "string", "phone": "string", "practice_area": "string", "description": "string" }`
+- **Output:** Confirmation with Lawmatics contact ID and Filevine project ID
+- **Systems:** Lawmatics → Airtable → Filevine
+
+### n8n.check_case_status
+- **Description:** Get current status of a case in Filevine
+- **Input:** `{ "project_id": "string" }` or `{ "client_name": "string" }`
+- **Output:** Case phase, assigned team, key dates, recent activity
+- **System:** Filevine API
+
+### n8n.update_filevine_phase
+- **Description:** Move a case to a new phase in Filevine
+- **Input:** `{ "project_id": "string", "new_phase": "string" }`
+- **Output:** Confirmation with previous and new phase
+- **System:** Filevine API
+- **Requires:** Attorney-level access
+
+### n8n.check_billing_status
+- **Description:** Check billing status for a matter in Clio
+- **Input:** `{ "matter_id": "string" }` or `{ "client_name": "string" }`
+- **Output:** Outstanding balance, last invoice date, payment status
+- **System:** Clio API
+
+### n8n.send_client_sms
+- **Description:** Send an SMS to a client via OpenPhone
+- **Input:** `{ "phone_number": "string (E.164)", "message": "string", "from_number": "string" }`
+- **Output:** Message SID, delivery status
+- **System:** OpenPhone API
+- **Requires:** Attorney-level access, message under 160 chars
+
+### n8n.sync_contact
+- **Description:** Sync a contact between Lawmatics and Filevine
+- **Input:** `{ "contact_id": "string", "direction": "lawmatics_to_filevine" | "filevine_to_lawmatics" }`
+- **Output:** Sync confirmation with field mapping results
+- **Systems:** Lawmatics API, Filevine API, Airtable (staging)
+
+### n8n.log_to_airtable
+- **Description:** Log an event to the operations Airtable base
+- **Input:** `{ "table": "string", "record": { ... } }`
+- **Output:** Airtable record ID
+- **System:** Airtable API
+
+---
+
+## Tool Access Matrix
+
+| Tool | orchestrator | ops-agent | research-agent | drafting-agent |
+|---|---|---|---|---|
+| read | Yes | Yes | Yes | Yes |
+| write | Yes | No | No | Yes |
+| memory_search | Yes | No | Yes | No |
+| sessions_spawn | Yes | No | No | No |
+| exec | No | Yes (allowlist) | No | No |
+| n8n.* (via MCP) | No | Yes | No | No |
+
+---
+
+## Adding New Tools
+
+### Adding an n8n MCP Tool
+
+1. Create the workflow in n8n with a Webhook trigger
+2. Name it with the `mcp_` prefix (e.g., `mcp_new_tool_name`)
+3. Ensure it returns structured JSON
+4. Document it in this file with input/output specs
+5. Test via curl before enabling for agents:
+   ```bash
+   curl -X POST http://localhost:5678/webhook/mcp_new_tool_name \
+     -H "Content-Type: application/json" \
+     -d '{"test_input": "value"}'
+   ```
+6. Restart OpenClaw to pick up the new MCP tool
+
+### Adding a Built-in Tool
+
+1. Update `openclaw.json` agent tool lists
+2. Document in this file
+3. Update AGENTS.md routing rules if needed
+4. Restart OpenClaw

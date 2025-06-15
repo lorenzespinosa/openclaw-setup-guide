@@ -1,0 +1,43 @@
+[Unit]
+Description=OpenClaw AI Agent Platform
+Documentation=https://github.com/openclaw-ai/openclaw
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=openclaw
+Group=openclaw
+WorkingDirectory=/opt/openclaw/app
+EnvironmentFile=/opt/openclaw/.env
+ExecStart=/usr/bin/node /opt/openclaw/app/dist/index.js --config /opt/openclaw/openclaw.json
+Restart=always
+RestartSec=10
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/openclaw/workspace
+ReadOnlyPaths=/opt/openclaw/app /opt/openclaw/openclaw.json
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+
+# Resource limits
+MemoryMax=2G
+CPUQuota=200%
+TasksMax=256
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openclaw
+
+[Install]
+WantedBy=multi-user.target
