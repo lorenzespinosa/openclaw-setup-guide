@@ -837,3 +837,11 @@ Copyright (c) 2025 Lorenz Espinosa.
 ---
 
 *Built with real production experience at [Acme Law](https://www.example.com). If this guide saved you time, give it a star.*
+
+## FAQ
+
+**Q: Does this work with Docker?**
+A: This guide covers native systemd deployment. Docker works but we recommend native for production stability.
+
+**Q: Which LLM provider should I use?**
+A: We recommend Anthropic Claude for primary conversations and a free model (minimax) for heartbeat/compaction to control costs.
