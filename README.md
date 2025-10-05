@@ -845,3 +845,10 @@ A: This guide covers native systemd deployment. Docker works but we recommend na
 
 **Q: Which LLM provider should I use?**
 A: We recommend Anthropic Claude for primary conversations and a free model (minimax) for heartbeat/compaction to control costs.
+## Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| Gateway won't start | Check port 18789 is free: `ss -tlnp \| grep 18789` |
+| Slack not connecting | Verify SLACK_APP_TOKEN starts with `xapp-` |
+| High token costs | Enable compaction with free model |
