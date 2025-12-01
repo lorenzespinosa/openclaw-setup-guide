@@ -146,3 +146,8 @@
 
 *Last reviewed: [DATE]*
 *Reviewed by: [NAME]*
+
+## Monthly Maintenance
+- [ ] Rotate gateway token
+- [ ] Review session logs for anomalies
+- [ ] Update OpenClaw to latest version
