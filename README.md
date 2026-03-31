@@ -614,7 +614,7 @@ Input: { "contact_name": "Jane Smith" }
 Output: {
   "status": "consult_scheduled",
   "next_appointment": "2025-04-01T14:00:00Z",
-  "assigned_attorney": "Alex Rivera",
+  "assigned_attorney": "J. Greenfield",
   "source": "lawmatics"
 }
 ```
