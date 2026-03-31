@@ -92,5 +92,5 @@ During scheduled maintenance, suppress non-critical alerts:
 |---|---|---|
 | Info | Log only | Nobody |
 | Warn | Post to #ops-alerts | On-call admin |
-| Fail | Post to #ops-alerts + DM admin | Lorenz (admin) |
-| Critical | Post + DM + attempt auto-recovery | Lorenz (admin) |
+| Fail | Post to #ops-alerts + DM admin | [Admin Name] |
+| Critical | Post + DM + attempt auto-recovery | [Admin Name] |
