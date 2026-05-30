@@ -1,6 +1,6 @@
 # OpenClaw Setup Guide for Law Firms
 
-> A comprehensive, production-tested guide for deploying [OpenClaw](https://github.com/openclaw-ai/openclaw) as a multi-agent AI platform in a law firm environment. Based on real-world experience running **OpsBot** at [Acme Law](https://www.example.com).
+> A comprehensive, production-tested guide for deploying [OpenClaw](https://github.com/openclaw-ai/openclaw) as a multi-agent AI platform in a law firm environment. Based on real-world experience running a multi-agent legal-ops assistant in production.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -23,6 +23,7 @@
 - [Cost Optimization](#cost-optimization)
 - [Monitoring & Maintenance](#monitoring--maintenance)
 - [Troubleshooting](#troubleshooting)
+- [FAQ](#faq)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -822,6 +823,16 @@ sudo systemctl start openclaw
 
 ---
 
+## FAQ
+
+**Q: Does this work with Docker?**
+A: This guide covers native systemd deployment. Docker works but we recommend native for production stability.
+
+**Q: Which LLM provider should I use?**
+A: We recommend Anthropic Claude for primary conversations and a free model (minimax) for heartbeat/compaction to control costs.
+
+---
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
@@ -836,15 +847,7 @@ Copyright (c) 2025 Lorenz Espinosa.
 
 ---
 
-*Built with real production experience at [Acme Law](https://www.example.com). If this guide saved you time, give it a star.*
-
-## FAQ
-
-**Q: Does this work with Docker?**
-A: This guide covers native systemd deployment. Docker works but we recommend native for production stability.
-
-**Q: Which LLM provider should I use?**
-A: We recommend Anthropic Claude for primary conversations and a free model (minimax) for heartbeat/compaction to control costs.
+*Built with real production deployment experience. If this guide saved you time, give it a star.*
 
 ---
 
