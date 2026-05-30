@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [3.1.0] - 2026-02-15
+
+### Added
+- FAQ section
+- Troubleshooting table
+- Monthly maintenance checklist
+
+---
+
 ## [3.0.0] - 2025-10-15
 
 ### Added
@@ -62,10 +71,3 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - MIT License
 - Contributing guidelines
 - Troubleshooting section
-
-## [3.1.0] - 2026-02-15
-
-### Added
-- FAQ section
-- Troubleshooting table
-- Monthly maintenance checklist
